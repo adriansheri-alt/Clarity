@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CLARITY">
+<title>CLARITY</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDE4MCAxODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSIzOCIgZmlsbD0iI2Y1ZjBlOCIvPgogIDx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIgogICAgZm9udC1mYW1pbHk9Ikdlb3JnaWEsIHNlcmlmIiBmb250LXNpemU9IjExMCIgZm9udC13ZWlnaHQ9IjMwMCIKICAgIGZpbGw9IiM3YTVjM2EiPkM8L3RleHQ+Cjwvc3ZnPg==">
+<script>
+// Generate and inject a proper apple-touch-icon via canvas
+window.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 180; canvas.height = 180;
+  const ctx = canvas.getContext('2d');
+
+// Background
+const grad = ctx.createLinearGradient(0, 0, 180, 180);
+grad.addColorStop(0, ‘#f5f0e8’);
+grad.addColorStop(1, ‘#ece4d4’);
+ctx.fillStyle = grad;
+// Rounded rect
+const r = 38;
+ctx.beginPath();
+ctx.moveTo(r, 0); ctx.lineTo(180-r, 0);
+ctx.quadraticCurveTo(180, 0, 180, r);
+ctx.lineTo(180, 180-r);
+ctx.quadraticCurveTo(180, 180, 180-r, 180);
+ctx.lineTo(r, 180);
+ctx.quadraticCurveTo(0, 180, 0, 180-r);
+ctx.lineTo(0, r);
+ctx.quadraticCurveTo(0, 0, r, 0);
+ctx.closePath();
+ctx.fill();
+
+// Subtle inner border
+ctx.strokeStyle = ‘rgba(122,92,58,0.15)’;
+ctx.lineWidth = 2;
+ctx.stroke();
+
+// Letter C
+ctx.fillStyle = ‘#7a5c3a’;
+ctx.font = ‘300 108px Georgia, serif’;
+ctx.textAlign = ‘center’;
+ctx.textBaseline = ‘middle’;
+ctx.fillText(‘C’, 92, 96);
+
+// Inject as apple-touch-icon
+const link = document.querySelector(‘link[rel=“apple-touch-icon”]’);
+if (link) link.href = canvas.toDataURL(‘image/png’);
+});
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Tenor+Sans&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #faf7f2;
+    --border: #e0d8cc;
+    --border-light: #ccc4b4;
+    --text: #2c2318;
+    --muted: #9a8f82;
+    --accent: #7a5c3a;
+    --accent-dim: #a07850;
+    --danger: #8b4a3a;
+  }
+
+- { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+background: var(–bg);
+color: var(–text);
+font-family: ‘Tenor Sans’, sans-serif;
+height: 100%;
+overflow: hidden;
+user-select: none;
+}
+
+#app {
+position: fixed; inset: 0;
+display: flex; flex-direction: column;
+}
+
+/* SCREENS */
+.screen {
+position: absolute; inset: 0;
+padding-top: env(safe-area-inset-top);
+padding-bottom: calc(env(safe-area-inset-bottom) + 70px);
+display: none;
+flex-direction: column;
+background: var(–bg);
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+}
+.screen.active { display: flex; animation: fadeIn 0.4s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* HEADER */
+.screen-header {
+padding: 28px 28px 20px;
+border-bottom: 1px solid var(–border);
+flex-shrink: 0;
+}
+.screen-label {
+font-size: 9px; letter-spacing: 4px; color: var(–accent); text-transform: uppercase; margin-bottom: 6px;
+}
+.screen-title {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: 28px; font-weight: 300; color: var(–text); line-height: 1.1;
+}
+.screen-date {
+font-size: 10px; color: var(–muted); letter-spacing: 2px; margin-top: 4px;
+}
+
+/* CONTENT */
+.screen-content {
+padding: 24px 28px;
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 24px;
+}
+
+/* QUESTION BLOCKS */
+.q-block {
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+.q-label {
+font-size: 10px; letter-spacing: 2.5px; color: var(–accent); text-transform: uppercase;
+}
+.q-prompt {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: 18px; font-weight: 300; color: var(–text); line-height: 1.4;
+font-style: italic;
+}
+.q-sub {
+font-size: 11px; color: var(–muted); letter-spacing: 1px; margin-top: -4px;
+}
+
+/* INPUTS */
+textarea, input[type=“text”] {
+background: #fff9f2;
+border: 1px solid var(–border);
+border-radius: 4px;
+color: var(–text);
+font-family: ‘Tenor Sans’, sans-serif;
+font-size: 14px;
+padding: 14px 16px;
+width: 100%;
+resize: none;
+outline: none;
+-webkit-appearance: none;
+transition: border-color 0.2s;
+line-height: 1.6;
+box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+}
+textarea:focus, input[type=“text”]:focus {
+border-color: var(–accent);
+background: #fffcf8;
+}
+textarea::placeholder, input::placeholder { color: var(–muted); }
+
+.emotion-row {
+display: flex;
+gap: 10px;
+}
+.emotion-row input { flex: 1; }
+.emotion-row textarea { flex: 2; }
+
+/* DIVIDER */
+.divider {
+height: 1px; background: var(–border); margin: 0 -4px;
+}
+
+/* PRIORITIES */
+.priority-item {
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 14px 16px;
+background: #fff9f2;
+border: 1px solid var(–border);
+border-radius: 4px;
+transition: border-color 0.2s;
+box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.priority-item.done {
+opacity: 0.45;
+border-color: transparent;
+}
+.priority-item.done .priority-text { text-decoration: line-through; color: var(–muted); }
+.priority-num {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: 20px; color: var(–accent); min-width: 18px; font-weight: 300;
+}
+.priority-text { font-size: 14px; color: var(–text); flex: 1; line-height: 1.4; }
+.priority-check {
+width: 22px; height: 22px;
+border: 1px solid var(–border-light);
+border-radius: 50%;
+flex-shrink: 0;
+transition: all 0.2s;
+}
+.priority-item.done .priority-check {
+background: var(–accent-dim);
+border-color: var(–accent-dim);
+}
+
+/* HABITS */
+.habit-row {
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 16px;
+background: #fff9f2;
+border: 1px solid var(–border);
+border-radius: 4px;
+transition: all 0.2s;
+}
+.habit-row.done { border-color: var(–accent-dim); }
+.habit-icon { font-size: 18px; min-width: 24px; text-align: center; }
+.habit-name { font-size: 13px; color: var(–text); flex: 1; letter-spacing: 0.5px; }
+.habit-streak { font-size: 10px; color: var(–muted); letter-spacing: 1px; }
+.habit-check {
+width: 22px; height: 22px;
+border: 1px solid var(–border-light);
+border-radius: 50%; flex-shrink: 0;
+transition: all 0.2s;
+}
+.habit-row.done .habit-check { background: var(–accent); border-color: var(–accent); }
+.habit-row.done .habit-name { color: var(–accent); }
+
+/* RESET BUTTON */
+.reset-btn {
+width: 100%;
+padding: 22px;
+background: transparent;
+border: 1px solid var(–danger);
+border-radius: 4px;
+color: #c47070;
+font-family: ‘Tenor Sans’, sans-serif;
+font-size: 11px;
+letter-spacing: 4px;
+text-transform: uppercase;
+cursor: pointer;
+transition: all 0.3s;
+margin-top: 8px;
+}
+.reset-btn:active { background: rgba(139,58,58,0.15); }
+
+/* SCORE */
+.score-row {
+display: flex; gap: 8px; flex-wrap: wrap;
+}
+.score-btn {
+flex: 1; min-width: 36px;
+padding: 12px 6px;
+background: #fff9f2;
+border: 1px solid var(–border);
+border-radius: 4px;
+color: var(–muted);
+font-family: ‘Cormorant Garamond’, serif;
+font-size: 18px;
+cursor: pointer;
+transition: all 0.2s;
+text-align: center;
+}
+.score-btn.selected { border-color: var(–accent); color: var(–accent); background: #f5ede0; }
+
+/* PRIMARY BUTTON */
+.btn-primary {
+width: 100%;
+padding: 18px;
+background: var(–accent);
+border: none;
+border-radius: 4px;
+color: #faf7f2;
+font-family: ‘Tenor Sans’, sans-serif;
+font-size: 11px;
+letter-spacing: 3px;
+text-transform: uppercase;
+cursor: pointer;
+transition: opacity 0.2s;
+margin-top: 4px;
+box-shadow: 0 2px 12px rgba(122,92,58,0.25);
+}
+.btn-primary:active { opacity: 0.8; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+height: calc(70px + env(safe-area-inset-bottom));
+background: #faf7f2;
+border-top: 1px solid var(–border);
+display: flex;
+align-items: flex-start;
+padding-top: 10px;
+z-index: 100;
+box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+}
+.tab {
+flex: 1;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 5px;
+background: none;
+border: none;
+cursor: pointer;
+padding: 4px 0;
+transition: opacity 0.2s;
+}
+.tab svg { width: 20px; height: 20px; stroke: var(–muted); transition: stroke 0.2s; }
+.tab span { font-size: 8px; letter-spacing: 1.5px; color: var(–muted); text-transform: uppercase; transition: color 0.2s; }
+.tab.active svg { stroke: var(–accent); }
+.tab.active span { color: var(–accent); }
+
+/* MODAL */
+.modal-overlay {
+position: fixed; inset: 0;
+background: rgba(245,240,232,0.97);
+display: none;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: 40px 28px;
+z-index: 200;
+text-align: center;
+}
+.modal-overlay.open { display: flex; animation: fadeIn 0.4s ease; }
+
+.breath-phase {
+font-size: 9px; letter-spacing: 4px; color: var(–accent); text-transform: uppercase; margin-bottom: 20px;
+}
+.breath-circle {
+width: 120px; height: 120px;
+border: 1px solid var(–accent-dim);
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+font-size: 32px; color: var(–accent);
+animation: breathe 8s ease-in-out infinite;
+margin-bottom: 32px;
+}
+@keyframes breathe {
+0%, 100% { transform: scale(1); opacity: 0.6; }
+50% { transform: scale(1.3); opacity: 1; }
+}
+.grounding-msg {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: 20px; font-weight: 300; color: var(–text);
+line-height: 1.5; margin-bottom: 8px; font-style: italic;
+}
+.grounding-ref {
+font-size: 10px; color: var(–accent); letter-spacing: 2px; margin-bottom: 28px;
+}
+.next-action-label {
+font-size: 10px; letter-spacing: 2px; color: var(–muted); text-transform: uppercase; margin-bottom: 12px;
+}
+.next-action-input {
+background: #fff9f2;
+border: 1px solid var(–border);
+border-radius: 4px;
+color: var(–text);
+font-family: ‘Tenor Sans’, sans-serif;
+font-size: 14px;
+padding: 14px 16px;
+width: 100%;
+outline: none;
+text-align: center;
+margin-bottom: 24px;
+}
+
+/* TOAST */
+.toast {
+position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+background: var(–text); border: none;
+color: var(–bg); font-size: 11px; letter-spacing: 1.5px;
+padding: 10px 20px; border-radius: 20px;
+opacity: 0; transition: opacity 0.3s; pointer-events: none;
+white-space: nowrap; z-index: 300;
+box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+.toast.show { opacity: 1; }
+
+/* VERSE of day */
+.verse-block {
+background: #f0e8d8;
+border-left: 2px solid var(–accent);
+padding: 16px 18px;
+border-radius: 0 4px 4px 0;
+}
+.verse-text {
+font-family: ‘Cormorant Garamond’, serif;
+font-size: 15px; font-weight: 300; color: var(–text);
+line-height: 1.6; font-style: italic; margin-bottom: 6px;
+}
+.verse-ref {
+font-size: 9px; letter-spacing: 2px; color: var(–accent); text-transform: uppercase;
+}
+
+.habit-score-row {
+display: flex; justify-content: space-between; align-items: center;
+padding: 0 2px; margin-top: -8px;
+}
+.habit-score-label { font-size: 10px; color: var(–muted); letter-spacing: 2px; text-transform: uppercase; }
+.habit-score-val { font-family: ‘Cormorant Garamond’, serif; font-size: 22px; color: var(–accent); }
+</style>
+
+</head>
+<body>
+<div id="app">
+
+  <!-- ═══════════════════════════════════ MAÑANA ═══════════════════════════════════ -->
+
+  <div class="screen active" id="screen-morning">
+    <div class="screen-header">
+      <div class="screen-label">Reflexión</div>
+      <div class="screen-title">Buenos días</div>
+      <div class="screen-date" id="morning-date"></div>
+    </div>
+    <div class="screen-content">
+
+```
+  <!-- Versículo del día -->
+  <div class="verse-block" id="morning-verse">
+    <div class="verse-text" id="verse-text"></div>
+    <div class="verse-ref" id="verse-ref"></div>
+  </div>
+
+  <!-- P1: Gratitud -->
+  <div class="q-block">
+    <div class="q-label">01 — Gratitud</div>
+    <div class="q-prompt">Hoy amanecí agradecido por...</div>
+    <textarea id="m-gratitud" rows="3" placeholder="Escribe aquí..."></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- P2: Emoción -->
+  <div class="q-block">
+    <div class="q-label">02 — Estado emocional</div>
+    <div class="q-prompt">Hoy me siento...</div>
+    <input type="text" id="m-emocion" placeholder="Una emoción (ej. tranquilo, ansioso, pleno...)">
+    <div class="q-sub">¿Por qué me siento así?</div>
+    <textarea id="m-emocion-porque" rows="3" placeholder="Explícate..."></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- P3: Intención -->
+  <div class="q-block">
+    <div class="q-label">03 — Intención del día</div>
+    <div class="q-prompt">Hoy voy a hacer esto para tener un día extraordinario, lleno de amor y propósito...</div>
+    <textarea id="m-intencion" rows="3" placeholder="¿Qué vas a hacer diferente hoy?"></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- P4: Manifestación -->
+  <div class="q-block">
+    <div class="q-label">04 — Manifestación</div>
+    <div class="q-prompt">Le pido a Dios, a Jesús y al universo que me ayude a manifestar hoy...</div>
+    <textarea id="m-manifestacion" rows="3" placeholder="Pide con fe..."></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 3 Prioridades -->
+  <div class="q-block">
+    <div class="q-label">05 — Mis 3 prioridades de hoy</div>
+    <div class="q-prompt">Las 3 cosas no negociables del día</div>
+    <input type="text" id="m-p1" placeholder="Prioridad 1">
+    <input type="text" id="m-p2" placeholder="Prioridad 2">
+    <input type="text" id="m-p3" placeholder="Prioridad 3">
+  </div>
+
+  <button class="btn-primary" onclick="saveMorning()">COMENZAR EL DÍA</button>
+
+</div>
+```
+
+  </div>
+
+  <!-- ═══════════════════════════════════ FOCUS ═══════════════════════════════════ -->
+
+  <div class="screen" id="screen-focus">
+    <div class="screen-header">
+      <div class="screen-label">Enfoque</div>
+      <div class="screen-title">Mis 3 prioridades</div>
+      <div class="screen-date" id="focus-date"></div>
+    </div>
+    <div class="screen-content">
+      <div id="focus-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+      <div style="margin-top:auto; padding-top:16px;">
+        <div class="q-label" style="margin-bottom:8px; text-align:center;">¿Necesitas recalibrarte?</div>
+        <button class="reset-btn" onclick="openReset()">⊕ RECALIBRAR / RESET</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ HÁBITOS ═══════════════════════════════════ -->
+
+  <div class="screen" id="screen-habits">
+    <div class="screen-header">
+      <div class="screen-label">Rutina</div>
+      <div class="screen-title">Hábitos de hoy</div>
+      <div class="screen-date" id="habit-date"></div>
+    </div>
+    <div class="screen-content">
+      <div class="habit-score-row">
+        <div class="habit-score-label">Completados</div>
+        <div class="habit-score-val" id="habit-score">0/4</div>
+      </div>
+      <div id="habit-grid" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════ NOCHE ═══════════════════════════════════ -->
+
+  <div class="screen" id="screen-night">
+    <div class="screen-header">
+      <div class="screen-label">Reflexión nocturna</div>
+      <div class="screen-title">Cerrar el día</div>
+      <div class="screen-date" id="night-date"></div>
+    </div>
+    <div class="screen-content">
+
+```
+  <div class="q-block">
+    <div class="q-label">01 — Alineación</div>
+    <div class="q-prompt">¿Viví hoy de manera alineada con mis valores y propósito?</div>
+    <textarea id="n-alineado" rows="3" placeholder="Reflexiona..."></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="q-block">
+    <div class="q-label">02 — Enfoque perdido</div>
+    <div class="q-prompt">¿En qué momentos perdí el enfoque o la paz hoy?</div>
+    <textarea id="n-perdido" rows="3" placeholder="Sin juicio, solo observa..."></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="q-block">
+    <div class="q-label">03 — Gratitud</div>
+    <div class="q-prompt">Tres cosas por las que estoy agradecido hoy...</div>
+    <textarea id="n-gratitud" rows="3" placeholder="Escribe con el corazón..."></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="q-block">
+    <div class="q-label">04 — Manifestación recibida</div>
+    <div class="q-prompt">¿Qué manifesté o recibí hoy que pedí esta mañana?</div>
+    <textarea id="n-manifestado" rows="3" placeholder="Reconoce las bendiciones..."></textarea>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="q-block">
+    <div class="q-label">05 — Puntuación del día</div>
+    <div class="q-prompt">Del 1 al 10, ¿cómo fue este día?</div>
+    <div class="score-row" id="score-row"></div>
+  </div>
+
+  <button class="btn-primary" onclick="saveNight()">CERRAR EL DÍA</button>
+
+</div>
+```
+
+  </div>
+
+  <!-- ═══════════════════════════════════ NAV ═══════════════════════════════════ -->
+
+  <nav class="bottom-nav">
+    <button class="tab active" id="tab-morning" onclick="goTo('morning')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+      <span>Mañana</span>
+    </button>
+    <button class="tab" id="tab-focus" onclick="goTo('focus')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      <span>Enfoque</span>
+    </button>
+    <button class="tab" id="tab-habits" onclick="goTo('habits')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg>
+      <span>Hábitos</span>
+    </button>
+    <button class="tab" id="tab-night" onclick="goTo('night')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <span>Noche</span>
+    </button>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- MODAL RESET -->
+
+<div class="modal-overlay" id="breathModal">
+  <div class="breath-phase" id="breathPhase">Inhala</div>
+  <div class="breath-circle">◎</div>
+  <div class="grounding-msg" id="grounding-msg">—</div>
+  <div class="grounding-ref" id="grounding-ref">—</div>
+  <div class="next-action-label">¿Cuál es la próxima acción correcta ahora?</div>
+  <input class="next-action-input" id="next-action" type="text" placeholder="Escríbela aquí...">
+  <button class="btn-primary" style="max-width:280px;" onclick="closeReset()">Estoy centrado. Continuar.</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const KEY = 'clarity_v2';
+let state = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+  morning: { gratitud:'', emocion:'', emocionPorque:'', intencion:'', manifestacion:'', priorities:['','',''] },
+  focus: { done:[false,false,false] },
+  habits: {},
+  night: { alineado:'', perdido:'', gratitud:'', manifestado:'', score:0 },
+  lastDate: ''
+};
+
+const HABITS = [
+  { id:'despertar', icon:'🌅', name:'Despertar 6 AM' },
+  { id:'respiracion', icon:'🌬', name:'Respiración' },
+  { id:'escritura', icon:'✍️', name:'Escritura' },
+  { id:'ejercicio', icon:'⚡', name:'Ejercicio' },
+];
+
+const VERSES = [
+  { text: "Sé fuerte y valiente. No temas ni te desanimes, porque el Señor tu Dios te acompañará dondequiera que vayas.", ref: "Josué 1:9" },
+  { text: "Todo lo puedo en Cristo que me fortalece.", ref: "Filipenses 4:13" },
+  { text: "Encomienda al Señor tus afanes y él te sostendrá.", ref: "Salmo 55:22" },
+  { text: "Porque yo sé los planes que tengo para ustedes, planes de bienestar y no de calamidad, para darles un futuro y una esperanza.", ref: "Jeremías 29:11" },
+  { text: "El Señor es mi pastor; nada me faltará.", ref: "Salmo 23:1" },
+  { text: "Confía en el Señor de todo corazón y no en tu propio entendimiento.", ref: "Proverbios 3:5" },
+  { text: "Busca primero el reino de Dios y su justicia, y todo lo demás te será añadido.", ref: "Mateo 6:33" },
+];
+
+const GROUNDING = [
+  { text: "Estás aquí. Estás presente. Todo está bien en este momento.", ref: "Respira y vuelve al ahora." },
+  { text: "Dios tiene el control. Tu trabajo es el siguiente paso.", ref: "Un paso a la vez." },
+  { text: "No necesitas resolver todo hoy. Solo necesitas avanzar.", ref: "Avanza con fe." },
+  { text: "La calma no es debilidad. Es la base de todo lo grande.", ref: "Desde la paz, actúa." },
+];
+
+let selectedScore = 0;
+let breathInterval = null;
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goTo(screen) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  document.getElementById('tab-' + screen).classList.add('active');
+
+  if (screen === 'morning') loadMorning();
+  if (screen === 'focus') loadFocus();
+  if (screen === 'habits') loadHabits();
+  if (screen === 'night') loadNight();
+}
+
+// ══════════════════════════════════════════
+// DATE UTILS
+// ══════════════════════════════════════════
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function formatDate(key) {
+  const d = new Date(key + 'T12:00:00');
+  return d.toLocaleDateString('es-MX', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+}
+
+function getDayVerse() {
+  const d = new Date();
+  return VERSES[d.getDay() % VERSES.length];
+}
+
+// ══════════════════════════════════════════
+// MORNING
+// ══════════════════════════════════════════
+function loadMorning() {
+  const today = todayKey();
+  document.getElementById('morning-date').textContent = formatDate(today);
+
+  const v = getDayVerse();
+  document.getElementById('verse-text').textContent = v.text;
+  document.getElementById('verse-ref').textContent = v.ref;
+
+  const m = state.morning;
+  document.getElementById('m-gratitud').value = m.gratitud || '';
+  document.getElementById('m-emocion').value = m.emocion || '';
+  document.getElementById('m-emocion-porque').value = m.emocionPorque || '';
+  document.getElementById('m-intencion').value = m.intencion || '';
+  document.getElementById('m-manifestacion').value = m.manifestacion || '';
+  document.getElementById('m-p1').value = m.priorities[0] || '';
+  document.getElementById('m-p2').value = m.priorities[1] || '';
+  document.getElementById('m-p3').value = m.priorities[2] || '';
+}
+
+function saveMorning() {
+  state.morning = {
+    gratitud: document.getElementById('m-gratitud').value,
+    emocion: document.getElementById('m-emocion').value,
+    emocionPorque: document.getElementById('m-emocion-porque').value,
+    intencion: document.getElementById('m-intencion').value,
+    manifestacion: document.getElementById('m-manifestacion').value,
+    priorities: [
+      document.getElementById('m-p1').value,
+      document.getElementById('m-p2').value,
+      document.getElementById('m-p3').value,
+    ]
+  };
+  state.focus.done = [false, false, false];
+  saveState();
+  showToast('Que sea un día extraordinario 🙏');
+  setTimeout(() => goTo('focus'), 800);
+}
+
+// ══════════════════════════════════════════
+// FOCUS
+// ══════════════════════════════════════════
+function loadFocus() {
+  const today = todayKey();
+  document.getElementById('focus-date').textContent = formatDate(today);
+
+  const list = document.getElementById('focus-list');
+  list.innerHTML = '';
+  const priorities = state.morning.priorities;
+  priorities.forEach((p, i) => {
+    if (!p) return;
+    const done = state.focus.done[i];
+    const el = document.createElement('div');
+    el.className = 'priority-item' + (done ? ' done' : '');
+    el.innerHTML = `
+      <span class="priority-num">${i+1}</span>
+      <span class="priority-text">${p}</span>
+      <div class="priority-check"></div>
+    `;
+    el.onclick = () => togglePriority(i);
+    list.appendChild(el);
+  });
+
+  if (!priorities.some(p => p)) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:40px 0;">Primero define tus 3 prioridades en la sección de Mañana.</div>';
+  }
+}
+
+function togglePriority(i) {
+  state.focus.done[i] = !state.focus.done[i];
+  saveState();
+  loadFocus();
+}
+
+// ══════════════════════════════════════════
+// RESET / RECALIBRAR
+// ══════════════════════════════════════════
+function openReset() {
+  const g = GROUNDING[Math.floor(Math.random() * GROUNDING.length)];
+  document.getElementById('grounding-msg').textContent = g.text;
+  document.getElementById('grounding-ref').textContent = g.ref;
+  document.getElementById('next-action').value = '';
+  document.getElementById('breathModal').classList.add('open');
+  startBreath();
+}
+
+function closeReset() {
+  document.getElementById('breathModal').classList.remove('open');
+  clearInterval(breathInterval);
+}
+
+function startBreath() {
+  const phases = ['Inhala... (4s)', 'Retén... (4s)', 'Exhala... (4s)', 'Pausa... (4s)'];
+  let i = 0;
+  document.getElementById('breathPhase').textContent = phases[0];
+  breathInterval = setInterval(() => {
+    i = (i + 1) % phases.length;
+    document.getElementById('breathPhase').textContent = phases[i];
+  }, 4000);
+}
+
+// ══════════════════════════════════════════
+// HABITS
+// ══════════════════════════════════════════
+function loadHabits() {
+  const today = todayKey();
+  document.getElementById('habit-date').textContent = formatDate(today);
+  if (!state.habits[today]) state.habits[today] = {};
+
+  const grid = document.getElementById('habit-grid');
+  grid.innerHTML = '';
+  let done = 0;
+
+  HABITS.forEach(h => {
+    const isDone = !!state.habits[today][h.id];
+    if (isDone) done++;
+    const row = document.createElement('div');
+    row.className = 'habit-row' + (isDone ? ' done' : '');
+    row.innerHTML = `
+      <span class="habit-icon">${h.icon}</span>
+      <span class="habit-name">${h.name}</span>
+      <span class="habit-streak">${getStreak(h.id)}d</span>
+      <div class="habit-check"></div>
+    `;
+    row.onclick = () => toggleHabit(h.id);
+    grid.appendChild(row);
+  });
+
+  document.getElementById('habit-score').textContent = done + '/' + HABITS.length;
+}
+
+function toggleHabit(id) {
+  const today = todayKey();
+  if (!state.habits[today]) state.habits[today] = {};
+  state.habits[today][id] = !state.habits[today][id];
+  saveState();
+  loadHabits();
+}
+
+function getStreak(habitId) {
+  let streak = 0;
+  const today = new Date();
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    if (state.habits[key] && state.habits[key][habitId]) streak++;
+    else if (i > 0) break;
+  }
+  return streak;
+}
+
+// ══════════════════════════════════════════
+// NIGHT
+// ══════════════════════════════════════════
+function loadNight() {
+  const today = todayKey();
+  document.getElementById('night-date').textContent = formatDate(today);
+
+  // Score buttons
+  const row = document.getElementById('score-row');
+  row.innerHTML = '';
+  for (let i = 1; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'score-btn' + (state.night.score === i ? ' selected' : '');
+    btn.textContent = i;
+    btn.onclick = () => setScore(i);
+    row.appendChild(btn);
+  }
+  selectedScore = state.night.score || 0;
+
+  document.getElementById('n-alineado').value = state.night.alineado || '';
+  document.getElementById('n-perdido').value = state.night.perdido || '';
+  document.getElementById('n-gratitud').value = state.night.gratitud || '';
+  document.getElementById('n-manifestado').value = state.night.manifestado || '';
+}
+
+function setScore(n) {
+  selectedScore = n;
+  state.night.score = n;
+  document.querySelectorAll('.score-btn').forEach((btn, i) => {
+    btn.classList.toggle('selected', i + 1 === n);
+  });
+}
+
+function saveNight() {
+  state.night = {
+    alineado: document.getElementById('n-alineado').value,
+    perdido: document.getElementById('n-perdido').value,
+    gratitud: document.getElementById('n-gratitud').value,
+    manifestado: document.getElementById('n-manifestado').value,
+    score: selectedScore
+  };
+  saveState();
+  showToast('Día cerrado. Descansa bien 🌙');
+}
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+function saveState() { localStorage.setItem(KEY, JSON.stringify(state)); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+loadMorning();
+</script>
+
+</body>
+</html>
